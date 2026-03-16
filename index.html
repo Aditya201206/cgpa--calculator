@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGPA Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h3 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .controls button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .controls button:hover {
+            background-color: #45a049;
+        }
+
+        .results {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .results span {
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            table, th, td {
+                font-size: 14px;
+            }
+
+            .controls button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CGPA Calculator</h1>
+    </header>
+    <main>
+        <div class="controls">
+            <button onclick="addSubject()">Add Subject</button>
+            <button onclick="resetCalculator()">Reset</button>
+        </div>
+
+        <table id="subjectsTable">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Credits</th>
+                    <th>Grade</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <h3>Grade Points Table (Editable)</h3>
+        <table id="gradePointsTable">
+            <thead>
+                <tr>
+                    <th>Grade</th>
+                    <th>Grade Point</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>O</td><td contenteditable="true">10</td></tr>
+                <tr><td>A+</td><td contenteditable="true">9.5</td></tr>
+                <tr><td>A</td><td contenteditable="true">9</td></tr>
+                <tr><td>B+</td><td contenteditable="true">8</td></tr>
+                <tr><td>B</td><td contenteditable="true">7</td></tr>
+                <tr><td>C</td><td contenteditable="true">6</td></tr>
+                <tr><td>P</td><td contenteditable="true">5</td></tr>
+                <tr><td>F</td><td contenteditable="true">0</td></tr>
+            </tbody>
+        </table>
+
+        <div class="results">
+            <p>Total Credits: <span id="totalCredits">0</span></p>
+            <p>Total Grade Points: <span id="totalGradePoints">0</span></p>
+            <p>CGPA: <span id="cgpa">0.00</span></p>
+            <p>Percentage: <span id="percentage">0.00%</span></p>
+        </div>
+    </main>
+
+    <script>
+        function addSubject() {
+            const table = document.getElementById('subjectsTable').getElementsByTagName('tbody')[0];
+            const row = table.insertRow();
+
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2);
+            const cell4 = row.insertCell(3);
+
+            cell1.innerHTML = `<input type='text' placeholder='Subject Name'>`;
+            cell2.innerHTML = `<input type='number' placeholder='Credits' min='1'>`;
+            cell3.innerHTML = `<select>
+                <option value="O">O</option>
+                <option value="A+">A+</option>
+                <option value="A">A</option>
+                <option value="B+">B+</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="P">P</option>
+                <option value="F">F</option>
+            </select>`;
+            cell4.innerHTML = `<button onclick="removeSubject(this)">Remove</button>`;
+        }
+
+        function removeSubject(button) {
+            const row = button.parentElement.parentElement;
+            row.parentElement.removeChild(row);
+            calculateCGPA();
+        }
+
+        function resetCalculator() {
+            document.getElementById('subjectsTable').getElementsByTagName('tbody')[0].innerHTML = '';
+            document.getElementById('totalCredits').innerText = '0';
+            document.getElementById('totalGradePoints').innerText = '0';
+            document.getElementById('cgpa').innerText = '0.00';
+            document.getElementById('percentage').innerText = '0.00%';
+        }
+
+        function calculateCGPA() {
+            const rows = document.getElementById('subjectsTable').getElementsByTagName('tbody')[0].rows;
+            const gradePointsTable = document.getElementById('gradePointsTable').getElementsByTagName('tbody')[0].rows;
+
+            const gradePointsMap = {};
+            for (let i = 0; i < gradePointsTable.length; i++) {
+                const grade = gradePointsTable[i].cells[0].innerText;
+                const point = parseFloat(gradePointsTable[i].cells[1].innerText);
+                gradePointsMap[grade] = point;
+            }
+
+            let totalCredits = 0;
+            let totalGradePoints = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                const credits = parseFloat(rows[i].cells[1].getElementsByTagName('input')[0].value) || 0;
+                const grade = rows[i].cells[2].getElementsByTagName('select')[0].value;
+                const gradePoint = gradePointsMap[grade] || 0;
+
+                totalCredits += credits;
+                totalGradePoints += credits * gradePoint;
+            }
+
+            const cgpa = totalCredits > 0 ? (totalGradePoints / totalCredits) : 0;
+            const percentage = cgpa * 10;
+
+            document.getElementById('totalCredits').innerText = totalCredits.toFixed(2);
+            document.getElementById('totalGradePoints').innerText = totalGradePoints.toFixed(2);
+            document.getElementById('cgpa').innerText = cgpa.toFixed(2);
+            document.getElementById('percentage').innerText = percentage.toFixed(2) + '%';
+        }
+
+        document.getElementById('subjectsTable').addEventListener('input', calculateCGPA);
+        document.getElementById('gradePointsTable').addEventListener('input', calculateCGPA);
+    </script>
+</body>
+</html>
