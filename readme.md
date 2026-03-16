@@ -81,8 +81,3 @@ The calculator multiplies each **credit with its grade point**, sums them, and d
 * Percentage conversion
 * Export results
 
----
-
-## License
-
-This project is open-source and available under the **MIT License**.
